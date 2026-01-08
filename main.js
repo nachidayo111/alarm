@@ -8,6 +8,8 @@ Notification.requestPermission();
 
 let reminders = JSON.parse(localStorage.getItem("reminders") || "[]");
 render();
+// ページ読み込み時に既存の予定を再スケジュール
+reminders.forEach(schedule);
 
 // 予定追加
 function addReminder() {
@@ -40,12 +42,33 @@ function addReminder() {
 function schedule(rem) {
   navigator.serviceWorker.ready.then(reg => {
     rem.offsets.forEach(min => {
-      reg.active.postMessage({
-        title:
-          min === 0 ? rem.title : `${Math.abs(min)}分前：${rem.title}`,
-        time: rem.time + min * 60000,
-        repeat: rem.repeat
-      });
+      const notifyTime = rem.time + min * 60000;
+      const delay = notifyTime - Date.now();
+      if (delay < 0) return;
+
+      setTimeout(() => {
+        const title = min === 0 ? rem.title : `${Math.abs(min)}分前：${rem.title}`;
+        if (reg && typeof reg.showNotification === "function") {
+          reg.showNotification(title, {
+            body: title,
+            icon: "icon.png"
+          });
+        } else if (window.Notification && Notification.permission === "granted") {
+          new Notification(title, { body: title, icon: "icon.png" });
+        }
+
+        // 繰り返しの再スケジュール（クライアント側で行う）
+        if (rem.repeat === "daily") {
+          rem.time = rem.time + 86400000;
+          localStorage.setItem("reminders", JSON.stringify(reminders));
+          schedule(rem);
+        }
+        if (rem.repeat === "weekly") {
+          rem.time = rem.time + 604800000;
+          localStorage.setItem("reminders", JSON.stringify(reminders));
+          schedule(rem);
+        }
+      }, delay);
     });
   });
 }
