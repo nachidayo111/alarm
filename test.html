@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="stylesheet" href="style.css">
+
+  <meta charset="UTF-8">
+  <title>Smart Reminder</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <h2>予定を追加</h2>
+
+  <input id="title" placeholder="予定内容"><br><br>
+
+  <input id="datetime" type="datetime-local"><br><br>
+
+  <select id="repeat">
+    <option value="none">繰り返しなし</option>
+    <option value="daily">毎日</option>
+    <option value="weekly">毎週</option>
+  </select><br><br>
+
+  <label><input type="checkbox" id="before10">10分前</label>
+  <label><input type="checkbox" id="before5">5分前</label><br><br>
+
+  <button onclick="addReminder()">保存</button>
+
+  <h3>予定一覧</h3>
+  <ul id="list"></ul>
+
+  <script src="main.js"></script>
+</body>
+</html>
